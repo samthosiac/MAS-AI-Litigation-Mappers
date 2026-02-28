@@ -1,0 +1,24 @@
+/* NetworkGraph styles for better visibility and value */
+.network-graph-container {
+  width: 100vw;
+  height: 100vh;
+  min-height: 0;
+  min-width: 0;
+  padding: 32px;
+  overflow: auto;
+  background: #18181B;
+}
+.network-graph-title {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 0 16px 0;
+  color: #fff;
+  text-align: center;
+}
+.network-graph-svg-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+/* Node, link, and label styles can be further customized in d3 code */

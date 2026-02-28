@@ -7,41 +7,120 @@ import BarChart from "./BarChart";
 
 // ── INSIGHTS TABS ──
 function InsightsTabs({ cases }) {
-  const [tab, setTab] = useState("bar");
-  const tabList = [
-    { key: "bar", label: "Bar Chart" },
-    { key: "sankey", label: "Sankey Diagram" },
-    { key: "network", label: "Network Graph" }
-  ];
   return (
     <div style={{ padding: 24, overflowY: "auto", height: "100%" }}>
-      <h2 style={{ fontSize: 19, fontWeight: 800, color: "#FAFAFA", letterSpacing: "-0.03em", marginBottom: 3 }}>Trends & Insights</h2>
-      <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
-        {tabList.map(t => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            style={{
-              padding: "8px 18px",
-              borderRadius: 7,
-              border: tab === t.key ? "2px solid #60A5FA" : "1px solid rgba(255,255,255,0.08)",
-              background: tab === t.key ? "rgba(96,165,250,0.10)" : "rgba(255,255,255,0.03)",
-              color: tab === t.key ? "#60A5FA" : "#FAFAFA",
-              fontWeight: 700,
-              fontSize: 14,
-              cursor: "pointer",
-              fontFamily: "'Outfit',sans-serif",
-              transition: "all .18s"
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
+      <h2 style={{ fontSize: 22, fontWeight: 900, color: "#FAFAFA", letterSpacing: "-0.03em", marginBottom: 8 }}>Litigation Insights</h2>
+      <div style={{ fontSize: 15, color: "#d1d5db", marginBottom: 18, fontWeight: 500 }}>
+        Trend analysis across 50 AI-related cases
       </div>
-      <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 18, border: "1px solid rgba(255,255,255,0.06)", minHeight: 420 }}>
-        {tab === "bar" && <BarChart cases={cases} />}
-        {tab === "sankey" && <SankeyDiagram cases={cases} />}
-        {tab === "network" && <NetworkGraph cases={cases} />}
+      {/* Filing Trend, Top Defendants, By Claim Type, By Sector, Key Findings */}
+      {/* You can further style or split these as needed for pixel-perfect match */}
+      <div style={{ display: "flex", gap: 24, marginBottom: 24 }}>
+        {/* Filing Trend */}
+        <div style={{ flex: 1, background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 18, border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#FF6B4A", marginBottom: 10, letterSpacing: "-0.01em", textTransform: "uppercase" }}>Filing Trend</div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', height: 80, gap: 12, marginBottom: 8 }}>
+            {(() => {
+              // Group by year
+              const years = {};
+              cases.forEach(c => { years[c.yr] = (years[c.yr] || 0) + 1; });
+              const sorted = Object.entries(years).sort((a, b) => a[0] - b[0]);
+              const max = Math.max(...sorted.map(([_, v]) => v), 1);
+              return sorted.map(([yr, count]) => (
+                <div key={yr} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                  <div style={{ fontWeight: 800, color: '#FF6B4A', fontSize: 15, marginBottom: 2 }}>{count}</div>
+                  <div style={{ width: 10, height: `${Math.max(10, 60 * count / max)}px`, background: '#FF6B4A', borderRadius: 3, marginBottom: 2 }}></div>
+                  <div style={{ fontSize: 11, color: '#d1d5db', fontWeight: 600 }}>{String(yr).slice(2)}</div>
+                </div>
+              ));
+            })()}
+          </div>
+        </div>
+        {/* Top Defendants */}
+        <div style={{ flex: 1, background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 18, border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#A78BFA", marginBottom: 10, letterSpacing: "-0.01em", textTransform: "uppercase" }}>Top Defendants</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+            {(() => {
+              // Count by defendant (split by comma)
+              const counts = {};
+              cases.forEach(c => c.df.split(',').forEach(df => {
+                const d = df.trim();
+                if (d) counts[d] = (counts[d] || 0) + 1;
+              }));
+              const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+              const max = Math.max(...sorted.map(([_, v]) => v), 1);
+              return sorted.map(([df, count]) => (
+                <div key={df} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontWeight: 700, color: '#A78BFA', fontSize: 13, width: 110 }}>{df}</span>
+                  <div style={{ flex: 1, height: 8, background: 'rgba(167,139,250,0.12)', borderRadius: 4, position: 'relative' }}>
+                    <div style={{ width: `${100 * count / max}%`, height: 8, background: '#A78BFA', borderRadius: 4 }}></div>
+                  </div>
+                  <span style={{ fontWeight: 700, color: '#A78BFA', fontSize: 13, width: 18, textAlign: 'right' }}>{count}</span>
+                </div>
+              ));
+            })()}
+          </div>
+        </div>
+      </div>
+      {/* By Claim Type */}
+      <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 18, border: "1px solid rgba(255,255,255,0.06)", marginBottom: 24, width: '100%', maxWidth: '100%' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "#60A5FA", marginBottom: 10, letterSpacing: "-0.01em" }}>By Claim Type</div>
+        <BarChart cases={cases} />
+      </div>
+      {/* By Sector */}
+      <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 18, border: "1px solid rgba(255,255,255,0.06)", marginBottom: 24 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "#60A5FA", marginBottom: 10, letterSpacing: "-0.01em" }}>By Sector</div>
+        <div style={{ marginTop: 8 }}>
+          {(() => {
+            // Count by sector
+            const counts = {};
+            cases.forEach(c => { counts[c.sec] = (counts[c.sec] || 0) + 1; });
+            const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+            const max = Math.max(...sorted.map(([_, v]) => v), 1);
+            return (
+              <div>
+                {sorted.map(([sector, count]) => (
+                  <div key={sector} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                    <span style={{ color: '#d1d5db', fontSize: 14, width: 140 }}>{sector}</span>
+                    <div style={{ flex: 1, height: 12, background: 'rgba(96,165,250,0.12)', borderRadius: 5, position: 'relative' }}>
+                      <div style={{ width: `${100 * count / max}%`, height: 12, background: '#60A5FA', borderRadius: 5 }}></div>
+                    </div>
+                    <span style={{ color: '#60A5FA', fontWeight: 700, fontSize: 15, width: 18, textAlign: 'right' }}>{count}</span>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+      {/* Sankey Diagram below By Sector */}
+      <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 18, border: "1px solid rgba(255,255,255,0.06)", marginBottom: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "#FF6B4A", marginBottom: 10, letterSpacing: "-0.01em", alignSelf: 'flex-start' }}>Sankey Diagram</div>
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <SankeyDiagram cases={cases} />
+        </div>
+      </div>
+      {/* Network Graph below Sankey Diagram */}
+      <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 18, border: "1px solid rgba(255,255,255,0.06)", marginBottom: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "#A78BFA", marginBottom: 10, letterSpacing: "-0.01em", alignSelf: 'flex-start' }}>Network Graph</div>
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <NetworkGraph cases={cases} />
+        </div>
+      </div>
+      {/* Key Findings */}
+      <div style={{ display: "flex", gap: 18, marginTop: 18 }}>
+        <div style={{ flex: 1, background: "rgba(255,255,255,0.03)", borderRadius: 10, padding: 16, border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ fontWeight: 800, color: "#FF6B4A", fontSize: 14, marginBottom: 6 }}>Copyright Dominates</div>
+          <div style={{ color: "#d1d5db", fontSize: 12.5 }}>Copyright claims are the largest category, driven by generative AI training data disputes between content creators and AI developers.</div>
+        </div>
+        <div style={{ flex: 1, background: "rgba(255,255,255,0.03)", borderRadius: 10, padding: 16, border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ fontWeight: 800, color: "#60A5FA", fontSize: 14, marginBottom: 6 }}>California Hub</div>
+          <div style={{ color: "#d1d5db", fontSize: 12.5 }}>The Northern District of California hosts more AI cases than any other jurisdiction due to Silicon Valley's concentration of AI companies.</div>
+        </div>
+        <div style={{ flex: 1, background: "rgba(255,255,255,0.03)", borderRadius: 10, padding: 16, border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ fontWeight: 800, color: "#34D399", fontSize: 14, marginBottom: 6 }}>2023-2024 Surge</div>
+          <div style={{ color: "#d1d5db", fontSize: 12.5 }}>AI-related filings accelerated dramatically in 2023-2024, coinciding with mainstream adoption of large language models.</div>
+        </div>
       </div>
     </div>
   );
@@ -130,9 +209,12 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [view, setView] = useState("map");
   const [page, setPage] = useState("main"); // 'main', 'timeline', 'cases', 'insights'
-  // Visualization selector options
+  // Visualization selector options (only for main view)
   const vizOptions = [
-    { k: "map", l: "Map" }
+    { k: "map", l: "Map" },
+    { k: "heatmap", l: "Heatmap" },
+    { k: "network", l: "Network Graph" },
+    { k: "sankey", l: "Sankey Diagram" }
   ];
   const [sel, setSel] = useState(null);
   const [hov, setHov] = useState(null);
@@ -182,6 +264,11 @@ export default function App() {
 
   const fc = Object.values(filters).flat().length+(search?1:0);
 
+  const [insightsSubpage, setInsightsSubpage] = useState(null);
+  // Reset sub-selection when leaving insights
+  useEffect(() => {
+    if (page !== "insights" && insightsSubpage !== null) setInsightsSubpage(null);
+  }, [page]);
   return (
     <div style={{fontFamily:"'Outfit',sans-serif",background:"#09090B",color:"#FAFAFA",height:"100vh",overflow:"hidden",position:"relative"}}>
       <style>{`
@@ -220,38 +307,10 @@ export default function App() {
           </div>
           <div style={{width:1,height:22,background:"rgba(255,255,255,0.08)"}}/>
           {/* Visualization Selector */}
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontSize:12,color:"rgba(255,255,255,0.5)",marginRight:4}}>View:</span>
-            <select
-              value={view}
-              onChange={e => { setView(e.target.value); setPage("main"); setSel(null); }}
-              style={{
-                padding: "6px 12px",
-                borderRadius: 6,
-                border: "1px solid rgba(255,255,255,0.08)",
-                background: "rgba(255,255,255,0.06)",
-                color: "#FAFAFA",
-                fontFamily: "'Outfit',sans-serif",
-                fontSize: 12,
-                fontWeight: 500,
-                outline: "none",
-                cursor: "pointer",
-                appearance: "none"
-              }}
-            >
-              {vizOptions.map(opt => (
-                <option key={opt.k} value={opt.k} style={{color:'#18181B',background:'#FFF'}}>{opt.l}</option>
-              ))}
-            </select>
-            <style>{`
-              select option {
-                color: #18181B !important;
-                background: #FFF !important;
-              }
-            `}</style>
-          </div>
+          {/* No subheader or selector for Map; Map is a main navigation option only */}
           {/* Add navigation buttons for Timeline, Cases, Insights */}
           <div style={{display:"flex",alignItems:"center",gap:6,marginLeft:18}}>
+            <button onClick={()=>{setPage("main"); setView("map"); setSel(null);}} style={{padding:"6px 14px",borderRadius:6,border:page==="main"?"1.5px solid #FB923C":"1px solid rgba(255,255,255,0.08)",background:page==="main"?"rgba(251,146,60,0.10)":"rgba(255,255,255,0.06)",color:page==="main"?"#FB923C":"#FAFAFA",fontFamily:"'Outfit',sans-serif",fontSize:12,fontWeight:600,cursor:"pointer"}}>Map</button>
             <button onClick={()=>{setPage("timeline"); setSel(null);}} style={{padding:"6px 14px",borderRadius:6,border:page==="timeline"?"1.5px solid #FF6B4A":"1px solid rgba(255,255,255,0.08)",background:page==="timeline"?"rgba(255,107,74,0.10)":"rgba(255,255,255,0.06)",color:page==="timeline"?"#FF6B4A":"#FAFAFA",fontFamily:"'Outfit',sans-serif",fontSize:12,fontWeight:600,cursor:"pointer"}}>Timeline</button>
             <button onClick={()=>{setPage("cases"); setSel(null);}} style={{padding:"6px 14px",borderRadius:6,border:page==="cases"?"1.5px solid #60A5FA":"1px solid rgba(255,255,255,0.08)",background:page==="cases"?"rgba(96,165,250,0.10)":"rgba(255,255,255,0.06)",color:page==="cases"?"#60A5FA":"#FAFAFA",fontFamily:"'Outfit',sans-serif",fontSize:12,fontWeight:600,cursor:"pointer"}}>Cases</button>
             <button onClick={()=>{setPage("insights"); setSel(null);}} style={{padding:"6px 14px",borderRadius:6,border:page==="insights"?"1.5px solid #34D399":"1px solid rgba(255,255,255,0.08)",background:page==="insights"?"rgba(52,211,153,0.10)":"rgba(255,255,255,0.06)",color:page==="insights"?"#34D399":"#FAFAFA",fontFamily:"'Outfit',sans-serif",fontSize:12,fontWeight:600,cursor:"pointer"}}>Trends & Insights</button>
@@ -292,12 +351,21 @@ export default function App() {
         <main style={{flex:1,overflow:"hidden",position:"relative"}}>
           {page==="main" && (
             <>
-              {view==="map"&&<MapV cases={filtered} byState={byState} hov={hov} setHov={setHov} sel={sel} setSel={setSel}/>}
+              {view==="map" && <MapV cases={filtered} byState={byState} hov={hov} setHov={setHov} sel={sel} setSel={setSel} />}
+              {view==="heatmap" && <Heatmap cases={filtered} />}
+              {view==="network" && <NetworkGraph cases={filtered} />}
+              {view==="sankey" && <SankeyDiagram cases={filtered} />}
             </>
           )}
           {page==="timeline" && <TimeV cases={filtered} stats={stats} sel={sel} setSel={setSel} />}
           {page==="cases" && <CaseV cases={filtered} sel={sel} setSel={setSel} />}
-        {page==="insights" && <InsightsTabs cases={filtered} />}
+          {page==="insights" && (
+            <InsightsTabs
+              cases={filtered}
+              selected={insightsSubpage}
+              setSelected={setInsightsSubpage}
+            />
+          )}
         </main>
 
         {/* DETAIL */}
