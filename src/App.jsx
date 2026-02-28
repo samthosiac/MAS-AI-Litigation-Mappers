@@ -263,7 +263,20 @@ export default function App() {
           )}
           {page==="timeline" && <TimeV cases={filtered} stats={stats} sel={sel} setSel={setSel} />}
           {page==="cases" && <CaseV cases={filtered} sel={sel} setSel={setSel} />}
-          {page==="insights" && <InsV cases={filtered} stats={stats} setSel={setSel} title="Trends & Insights" />}
+          {page==="insights" && (
+            <div style={{padding:24,overflowY:"auto",height:"100%"}}>
+              <h2 style={{fontSize:19,fontWeight:800,color:"#FAFAFA",letterSpacing:"-0.03em",marginBottom:3}}>Trends & Insights</h2>
+              <p style={{fontSize:12,color:"rgba(255,255,255,0.38)",marginBottom:22}}>Explore trends in AI litigation by year, state, or city, and view the network of parties involved.</p>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,alignItems:"start"}}>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:12,padding:18,border:"1px solid rgba(255,255,255,0.06)"}}>
+                  <BarChart cases={filtered} />
+                </div>
+                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:12,padding:18,border:"1px solid rgba(255,255,255,0.06)"}}>
+                  <NetworkGraph cases={filtered} />
+                </div>
+              </div>
+            </div>
+          )}
         </main>
 
         {/* DETAIL */}
