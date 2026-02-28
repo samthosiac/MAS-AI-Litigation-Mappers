@@ -86,6 +86,7 @@ export default function App() {
   const [filters, setFilters] = useState({years:[],claims:[],sectors:[],statuses:[]});
   const [search, setSearch] = useState("");
   const [view, setView] = useState("map");
+  const [page, setPage] = useState("main"); // 'main', 'timeline', 'cases', 'insights'
   // Visualization selector options
   const vizOptions = [
     { k: "map", l: "Map" },
@@ -184,7 +185,7 @@ export default function App() {
             <span style={{fontSize:12,color:"rgba(255,255,255,0.5)",marginRight:4}}>View:</span>
             <select
               value={view}
-              onChange={e => { setView(e.target.value); setSel(null); }}
+              onChange={e => { setView(e.target.value); setPage("main"); setSel(null); }}
               style={{
                 padding: "6px 12px",
                 borderRadius: 6,
@@ -210,6 +211,12 @@ export default function App() {
               }
             `}</style>
           </div>
+          {/* Add navigation buttons for Timeline, Cases, Insights */}
+          <div style={{display:"flex",alignItems:"center",gap:6,marginLeft:18}}>
+            <button onClick={()=>{setPage("timeline"); setSel(null);}} style={{padding:"6px 14px",borderRadius:6,border:page==="timeline"?"1.5px solid #FF6B4A":"1px solid rgba(255,255,255,0.08)",background:page==="timeline"?"rgba(255,107,74,0.10)":"rgba(255,255,255,0.06)",color:page==="timeline"?"#FF6B4A":"#FAFAFA",fontFamily:"'Outfit',sans-serif",fontSize:12,fontWeight:600,cursor:"pointer"}}>Timeline</button>
+            <button onClick={()=>{setPage("cases"); setSel(null);}} style={{padding:"6px 14px",borderRadius:6,border:page==="cases"?"1.5px solid #60A5FA":"1px solid rgba(255,255,255,0.08)",background:page==="cases"?"rgba(96,165,250,0.10)":"rgba(255,255,255,0.06)",color:page==="cases"?"#60A5FA":"#FAFAFA",fontFamily:"'Outfit',sans-serif",fontSize:12,fontWeight:600,cursor:"pointer"}}>Cases</button>
+            <button onClick={()=>{setPage("insights"); setSel(null);}} style={{padding:"6px 14px",borderRadius:6,border:page==="insights"?"1.5px solid #34D399":"1px solid rgba(255,255,255,0.08)",background:page==="insights"?"rgba(52,211,153,0.10)":"rgba(255,255,255,0.06)",color:page==="insights"?"#34D399":"#FAFAFA",fontFamily:"'Outfit',sans-serif",fontSize:12,fontWeight:600,cursor:"pointer"}}>Trends & Insights</button>
+          </div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <div style={{position:"relative"}}>
@@ -224,8 +231,8 @@ export default function App() {
       <div style={{display:"flex",height:"calc(100vh - 54px)",position:"relative",zIndex:1}}>
 
         {/* SIDEBAR */}
-        <aside style={{width:sidebar?230:0,overflow:"hidden",flexShrink:0,borderRight:"1px solid rgba(255,255,255,0.05)",background:"rgba(255,255,255,0.01)",transition:"width .3s"}}>
-          <div style={{width:230,padding:"14px 12px",overflowY:"auto",height:"100%"}}>
+        <aside style={{width:sidebar?320:0,overflow:"hidden",flexShrink:0,borderRight:"1px solid rgba(255,255,255,0.05)",background:"rgba(255,255,255,0.01)",transition:"width .3s"}}>
+          <div style={{width:320,padding:"24px 20px",overflowY:"auto",height:"100%"}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
               <span style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:9,fontWeight:600,color:"rgba(255,255,255,0.25)",letterSpacing:"0.12em",textTransform:"uppercase"}}>Filters</span>
               {fc>0&&<button onClick={clr} style={{padding:"2px 7px",borderRadius:4,border:"1px solid rgba(255,107,74,0.3)",background:"rgba(255,107,74,0.08)",color:"#FF6B4A",fontFamily:"'Outfit',sans-serif",fontSize:10,cursor:"pointer"}}>Clear {fc}</button>}
@@ -244,12 +251,18 @@ export default function App() {
 
         {/* MAIN */}
         <main style={{flex:1,overflow:"hidden",position:"relative"}}>
-          {/* Visualization rendering (to be implemented) */}
-          {view==="map"&&<MapV cases={filtered} byState={byState} hov={hov} setHov={setHov} sel={sel} setSel={setSel}/>}
-          {view==="barchart"&&<div style={{padding:40}}>Bar Chart visualization coming soon...</div>}
-          {view==="heatmap"&&<Heatmap cases={filtered} />}
-          {view==="network"&&<NetworkGraph cases={filtered} />}
-          {view==="sankey"&&<SankeyDiagram cases={filtered} />}
+          {page==="main" && (
+            <>
+              {view==="map"&&<MapV cases={filtered} byState={byState} hov={hov} setHov={setHov} sel={sel} setSel={setSel}/>}
+              {view==="barchart"&&<div style={{padding:40}}>Bar Chart visualization coming soon...</div>}
+              {view==="heatmap"&&<Heatmap cases={filtered} />}
+              {view==="network"&&<NetworkGraph cases={filtered} />}
+              {view==="sankey"&&<SankeyDiagram cases={filtered} />}
+            </>
+          )}
+          {page==="timeline" && <TimeV cases={filtered} stats={stats} sel={sel} setSel={setSel} />}
+          {page==="cases" && <CaseV cases={filtered} sel={sel} setSel={setSel} />}
+          {page==="insights" && <InsV cases={filtered} stats={stats} setSel={setSel} title="Trends & Insights" />}
         </main>
 
         {/* DETAIL */}
@@ -263,19 +276,19 @@ export default function App() {
 function FB({t,items,act,tog,gc,cnt}) {
   const [open,setOpen]=useState(true);
   return (
-    <div style={{marginBottom:12}}>
-      <button onClick={()=>setOpen(p=>!p)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",background:"none",border:"none",cursor:"pointer",padding:"3px 0",marginBottom:5}}>
-        <span style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:9,fontWeight:600,color:"rgba(255,255,255,0.25)",letterSpacing:"0.1em",textTransform:"uppercase"}}>{t}</span>
-        <span style={{fontSize:8,color:"rgba(255,255,255,0.15)",transform:open?"rotate(0)":"rotate(-90deg)",transition:"transform .2s"}}>▾</span>
+    <div style={{marginBottom:18}}>
+      <button onClick={()=>setOpen(p=>!p)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",background:"none",border:"none",cursor:"pointer",padding:"6px 0",marginBottom:8}}>
+        <span style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:13,fontWeight:700,color:"rgba(255,255,255,0.25)",letterSpacing:"0.1em",textTransform:"uppercase"}}>{t}</span>
+        <span style={{fontSize:12,color:"rgba(255,255,255,0.15)",transform:open?"rotate(0)":"rotate(-90deg)",transition:"transform .2s"}}>▾</span>
       </button>
       {open&&items.map(item=>{
         const on=act.includes(item);const color=gc(item)||"#60A5FA";
-        return <button key={item} className="chip" onClick={()=>tog(item)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",padding:"4px 7px",borderRadius:4,border:`1px solid ${on?color+"33":"transparent"}`,background:on?color+"12":"transparent",marginBottom:1}}>
-          <div style={{display:"flex",alignItems:"center",gap:6}}>
-            <div style={{width:5,height:5,borderRadius:2,background:on?color:"rgba(255,255,255,0.1)",transition:"all .2s"}}/>
-            <span style={{fontSize:11,color:on?"#FAFAFA":"rgba(255,255,255,0.38)",fontWeight:on?500:400}}>{item}</span>
+        return <button key={item} className="chip" onClick={()=>tog(item)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",padding:"8px 14px",borderRadius:6,border:`1.5px solid ${on?color+"33":"transparent"}`,background:on?color+"18":"transparent",marginBottom:3}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:9,height:9,borderRadius:3,background:on?color:"rgba(255,255,255,0.1)",transition:"all .2s"}}/>
+            <span style={{fontSize:15,color:on?"#FAFAFA":"rgba(255,255,255,0.38)",fontWeight:on?600:400}}>{item}</span>
           </div>
-          <span style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:9,color:"rgba(255,255,255,0.18)"}}>{cnt[item]||0}</span>
+          <span style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:13,color:"rgba(255,255,255,0.18)"}}>{cnt[item]||0}</span>
         </button>;
       })}
     </div>
@@ -415,7 +428,7 @@ function CaseV({cases,sel,setSel}) {
 }
 
 // ── INSIGHTS ──
-function InsV({cases,stats,setSel}) {
+function InsV({cases,stats,setSel,title}) {
   const clE=Object.entries(stats.byCl).sort((a,b)=>b[1]-a[1]);
   const secE=Object.entries(stats.bySec).sort((a,b)=>b[1]-a[1]);
   const yrE=Object.entries(stats.byYr).sort((a,b)=>a[0]-b[0]);
@@ -424,7 +437,7 @@ function InsV({cases,stats,setSel}) {
   const topD=Object.entries(defM).sort((a,b)=>b[1]-a[1]).slice(0,8);
   return (
     <div style={{padding:24,overflowY:"auto",height:"100%"}}>
-      <h2 style={{fontSize:19,fontWeight:800,color:"#FAFAFA",letterSpacing:"-0.03em",marginBottom:3}}>Litigation Insights</h2>
+      <h2 style={{fontSize:19,fontWeight:800,color:"#FAFAFA",letterSpacing:"-0.03em",marginBottom:3}}>{title || "Trends & Insights"}</h2>
       <p style={{fontSize:12,color:"rgba(255,255,255,0.38)",marginBottom:22}}>Trend analysis across {cases.length} AI-related cases</p>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}>
         {/* Year chart */}
