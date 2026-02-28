@@ -132,11 +132,7 @@ export default function App() {
   const [page, setPage] = useState("main"); // 'main', 'timeline', 'cases', 'insights'
   // Visualization selector options
   const vizOptions = [
-    { k: "map", l: "Map" },
-    { k: "barchart", l: "Bar Chart" },
-    { k: "heatmap", l: "Heatmap" },
-    { k: "network", l: "Network Graph" },
-    { k: "sankey", l: "Sankey Diagram" },
+    { k: "map", l: "Map" }
   ];
   const [sel, setSel] = useState(null);
   const [hov, setHov] = useState(null);
