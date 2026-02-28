@@ -3,6 +3,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from "react"
 import Heatmap from "./Heatmap";
 import NetworkGraph from "./NetworkGraph";
 import SankeyDiagram from "./SankeyDiagram";
+import BarChart from "./BarChart";
 
 /* ═══════════════════════════════════════════════════════════════════════
    MAS AI LITIGATION MAP
@@ -254,7 +255,7 @@ export default function App() {
           {page==="main" && (
             <>
               {view==="map"&&<MapV cases={filtered} byState={byState} hov={hov} setHov={setHov} sel={sel} setSel={setSel}/>}
-              {view==="barchart"&&<div style={{padding:40}}>Bar Chart visualization coming soon...</div>}
+              {view==="barchart"&&<BarChart cases={filtered} />}
               {view==="heatmap"&&<Heatmap cases={filtered} />}
               {view==="network"&&<NetworkGraph cases={filtered} />}
               {view==="sankey"&&<SankeyDiagram cases={filtered} />}
