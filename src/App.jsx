@@ -1,4 +1,8 @@
+
 import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import Heatmap from "./Heatmap";
+import NetworkGraph from "./NetworkGraph";
+import SankeyDiagram from "./SankeyDiagram";
 
 /* ═══════════════════════════════════════════════════════════════════════
    MAS AI LITIGATION MAP
@@ -82,6 +86,14 @@ export default function App() {
   const [filters, setFilters] = useState({years:[],claims:[],sectors:[],statuses:[]});
   const [search, setSearch] = useState("");
   const [view, setView] = useState("map");
+  // Visualization selector options
+  const vizOptions = [
+    { k: "map", l: "Map" },
+    { k: "barchart", l: "Bar Chart" },
+    { k: "heatmap", l: "Heatmap" },
+    { k: "network", l: "Network Graph" },
+    { k: "sankey", l: "Sankey Diagram" },
+  ];
   const [sel, setSel] = useState(null);
   const [hov, setHov] = useState(null);
   const [sidebar, setSidebar] = useState(true);
@@ -167,10 +179,36 @@ export default function App() {
             </div>
           </div>
           <div style={{width:1,height:22,background:"rgba(255,255,255,0.08)"}}/>
-          <div style={{display:"flex",gap:3}}>
-            {[{k:"map",l:"◉ Map"},{k:"timeline",l:"◫ Timeline"},{k:"cases",l:"☰ Cases"},{k:"insights",l:"◈ Insights"}].map(v=>(
-              <button key={v.k} onClick={()=>{setView(v.k);setSel(null);}} style={{padding:"7px 13px",borderRadius:6,border:"none",cursor:"pointer",fontFamily:"'Outfit',sans-serif",fontSize:12,fontWeight:view===v.k?600:400,color:view===v.k?"#FAFAFA":"rgba(255,255,255,0.4)",background:view===v.k?"rgba(255,255,255,0.06)":"transparent",transition:"all .2s"}}>{v.l}</button>
-            ))}
+          {/* Visualization Selector */}
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:12,color:"rgba(255,255,255,0.5)",marginRight:4}}>View:</span>
+            <select
+              value={view}
+              onChange={e => { setView(e.target.value); setSel(null); }}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 6,
+                border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(255,255,255,0.06)",
+                color: "#FAFAFA",
+                fontFamily: "'Outfit',sans-serif",
+                fontSize: 12,
+                fontWeight: 500,
+                outline: "none",
+                cursor: "pointer",
+                appearance: "none"
+              }}
+            >
+              {vizOptions.map(opt => (
+                <option key={opt.k} value={opt.k} style={{color:'#18181B',background:'#FFF'}}>{opt.l}</option>
+              ))}
+            </select>
+            <style>{`
+              select option {
+                color: #18181B !important;
+                background: #FFF !important;
+              }
+            `}</style>
           </div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
@@ -206,10 +244,12 @@ export default function App() {
 
         {/* MAIN */}
         <main style={{flex:1,overflow:"hidden",position:"relative"}}>
+          {/* Visualization rendering (to be implemented) */}
           {view==="map"&&<MapV cases={filtered} byState={byState} hov={hov} setHov={setHov} sel={sel} setSel={setSel}/>}
-          {view==="timeline"&&<TimeV cases={filtered} stats={stats} sel={sel} setSel={setSel}/>}
-          {view==="cases"&&<CaseV cases={filtered} sel={sel} setSel={setSel}/>}
-          {view==="insights"&&<InsV cases={filtered} stats={stats} setSel={setSel}/>}
+          {view==="barchart"&&<div style={{padding:40}}>Bar Chart visualization coming soon...</div>}
+          {view==="heatmap"&&<Heatmap cases={filtered} />}
+          {view==="network"&&<NetworkGraph cases={filtered} />}
+          {view==="sankey"&&<SankeyDiagram cases={filtered} />}
         </main>
 
         {/* DETAIL */}
