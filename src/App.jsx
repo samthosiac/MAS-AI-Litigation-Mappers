@@ -5,6 +5,48 @@ import NetworkGraph from "./NetworkGraph";
 import SankeyDiagram from "./SankeyDiagram";
 import BarChart from "./BarChart";
 
+// ── INSIGHTS TABS ──
+function InsightsTabs({ cases }) {
+  const [tab, setTab] = useState("bar");
+  const tabList = [
+    { key: "bar", label: "Bar Chart" },
+    { key: "sankey", label: "Sankey Diagram" },
+    { key: "network", label: "Network Graph" }
+  ];
+  return (
+    <div style={{ padding: 24, overflowY: "auto", height: "100%" }}>
+      <h2 style={{ fontSize: 19, fontWeight: 800, color: "#FAFAFA", letterSpacing: "-0.03em", marginBottom: 3 }}>Trends & Insights</h2>
+      <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
+        {tabList.map(t => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            style={{
+              padding: "8px 18px",
+              borderRadius: 7,
+              border: tab === t.key ? "2px solid #60A5FA" : "1px solid rgba(255,255,255,0.08)",
+              background: tab === t.key ? "rgba(96,165,250,0.10)" : "rgba(255,255,255,0.03)",
+              color: tab === t.key ? "#60A5FA" : "#FAFAFA",
+              fontWeight: 700,
+              fontSize: 14,
+              cursor: "pointer",
+              fontFamily: "'Outfit',sans-serif",
+              transition: "all .18s"
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, padding: 18, border: "1px solid rgba(255,255,255,0.06)", minHeight: 420 }}>
+        {tab === "bar" && <BarChart cases={cases} />}
+        {tab === "sankey" && <SankeyDiagram cases={cases} />}
+        {tab === "network" && <NetworkGraph cases={cases} />}
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    MAS AI LITIGATION MAP
    GW Law Ethical Tech Initiative — Hackathon 2026
@@ -255,28 +297,11 @@ export default function App() {
           {page==="main" && (
             <>
               {view==="map"&&<MapV cases={filtered} byState={byState} hov={hov} setHov={setHov} sel={sel} setSel={setSel}/>}
-              {view==="barchart"&&<BarChart cases={filtered} />}
-              {view==="heatmap"&&<Heatmap cases={filtered} />}
-              {view==="network"&&<NetworkGraph cases={filtered} />}
-              {view==="sankey"&&<SankeyDiagram cases={filtered} />}
             </>
           )}
           {page==="timeline" && <TimeV cases={filtered} stats={stats} sel={sel} setSel={setSel} />}
           {page==="cases" && <CaseV cases={filtered} sel={sel} setSel={setSel} />}
-          {page==="insights" && (
-            <div style={{padding:24,overflowY:"auto",height:"100%"}}>
-              <h2 style={{fontSize:19,fontWeight:800,color:"#FAFAFA",letterSpacing:"-0.03em",marginBottom:3}}>Trends & Insights</h2>
-              <p style={{fontSize:12,color:"rgba(255,255,255,0.38)",marginBottom:22}}>Explore trends in AI litigation by year, state, or city, and view the network of parties involved.</p>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,alignItems:"start"}}>
-                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:12,padding:18,border:"1px solid rgba(255,255,255,0.06)"}}>
-                  <BarChart cases={filtered} />
-                </div>
-                <div style={{background:"rgba(255,255,255,0.03)",borderRadius:12,padding:18,border:"1px solid rgba(255,255,255,0.06)"}}>
-                  <NetworkGraph cases={filtered} />
-                </div>
-              </div>
-            </div>
-          )}
+        {page==="insights" && <InsightsTabs cases={filtered} />}
         </main>
 
         {/* DETAIL */}
