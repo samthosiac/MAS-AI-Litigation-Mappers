@@ -34,7 +34,15 @@ export default function BarChart({ cases }) {
   const max = Math.max(...Object.values(counts), 1);
 
   return (
-    <div style={{ padding: 32, height: "100%", overflowY: "auto" }}>
+    <div style={{
+      width: "100vw",
+      height: "100vh",
+      minHeight: 0,
+      minWidth: 0,
+      padding: 32,
+      overflow: "auto",
+      background: "#18181B"
+    }}>
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
         <h2 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>Cases by {label}</h2>
         <select value={groupBy} onChange={e => setGroupBy(e.target.value)} style={{ padding: "6px 12px", borderRadius: 6, fontSize: 14 }}>
